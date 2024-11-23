@@ -6,14 +6,18 @@ const RequestForm = () => {
     const [url, setUrl] = useState('');
     const [method, setMethod] = useState('GET');
     const [response, setResponse] = useState(null);
-
+    const [requestBody, setRequestBody]=useState('');
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios({ method, url });
+            const config={method,url};
+            if(method !== 'GET'){
+                config.data=JSON.parse(requestBody);
+            }
+            const res = await axios(config);
             setResponse(res.data);
         } catch (error) {
-            setResponse(error.message);
+            setResponse(error.response ? error.response.data : error.message);
         }
     };
 
@@ -34,10 +38,26 @@ const RequestForm = () => {
                     <option value="DELETE">DELETE</option>
                 </select>
                 <button type="submit">Send Request</button>
+                <br></br>
+                {method !== 'GET' && (
+                <textarea
+                value={requestBody}
+                onChange={(e)=> setRequestBody(e.target.value)}
+                placeholder='Enter request body(JSON)'
+                /> 
+                )}
             </form>
-            {response && <pre>{JSON.stringify(response, null, 2)}</pre>}
+            {response && (
+                <div>
+                    <h3>
+                        Response:
+                    </h3>
+                    <pre>{JSON.stringify(response, null, 2)}</pre>
+                </div>
+                )}
         </div>
     );
 };
 
 export default RequestForm;
+
